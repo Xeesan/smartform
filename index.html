@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loc-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2.5px solid #d1d5db;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ===== AUTO DARK MODE ===== */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #111827 !important;
+            }
+
+            /* Main card */
+            .bg-white {
+                background-color: #1f2937 !important;
+            }
+
+            .border-gray-200 {
+                border-color: #374151 !important;
+            }
+
+            /* Header */
+            .bg-blue-700 {
+                background-color: #1e3a5f !important;
+            }
+
+            /* Text colors */
+            .text-gray-700 {
+                color: #d1d5db !important;
+            }
+
+            .text-gray-800 {
+                color: #f3f4f6 !important;
+            }
+
+            .text-gray-500 {
+                color: #9ca3af !important;
+            }
+
+            /* Inputs & textareas */
+            input[type="text"],
+            input[type="tel"],
+            input[type="date"],
+            textarea,
+            select {
+                background-color: #111827 !important;
+                color: #f3f4f6 !important;
+                border-color: #4b5563 !important;
+            }
+
+            input::placeholder,
+            textarea::placeholder {
+                color: #6b7280 !important;
+            }
+
+            input:focus,
+            textarea:focus,
+            select:focus {
+                border-color: #3b82f6 !important;
+            }
+
+            /* Gray backgrounds (checkbox area, GPS area, optional fields) */
+            .bg-gray-50 {
+                background-color: #111827 !important;
+            }
+
+            .border-gray-200 {
+                border-color: #374151 !important;
+            }
+
+            /* GPS capture button */
+            .bg-white.border.border-gray-400 {
+                background-color: #374151 !important;
+                border-color: #4b5563 !important;
+                color: #d1d5db !important;
+            }
+
+            /* Submit button */
+            .bg-green-700 {
+                background-color: #15803d !important;
+            }
+
+            .bg-green-700:hover {
+                background-color: #166534 !important;
+            }
+
+            /* Success checkmark circle */
+            .bg-green-100 {
+                background-color: #064e3b !important;
+            }
+
+            /* Select dropdown arrow */
+            .pointer-events-none .fill-current {
+                color: #9ca3af !important;
+            }
+
+            /* Spinner in dark mode */
+            .loc-spinner {
+                border-color: #4b5563;
+                border-top-color: #60a5fa;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+
+        <div class="bg-blue-700 p-6 text-center text-white">
+            <h1 class="text-2xl font-bold uppercase tracking-wider">MUX Internet</h1>
+            <p class="text-blue-100 text-xs mt-1 uppercase font-semibold">New Connection Application</p>
+        </div>
+
+        <div class="p-6">
+            <form id="myForm" onsubmit="handleFormSubmit(event, this)">
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Full Name</label>
+                    <input type="text" name="name" required placeholder="Enter full name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Primary Mobile Number</label>
+                    <input type="tel" name="mobile" required placeholder="017xxxxxxxx" pattern="01[3-9][0-9]{8}"
+                        maxlength="11" title="Enter a valid 11-digit BD number (e.g. 01712345678)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors peer">
+                    <p class="text-xs text-red-500 mt-1 hidden peer-[&:not(:placeholder-shown):invalid]:block">Must be
+                        11 digits starting with 01 (e.g. 01712345678)</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Secondary Mobile (Optional)</label>
+                    <input type="tel" name="secMobile" placeholder="Backup number..." pattern="01[3-9][0-9]{8}"
+                        maxlength="11" title="Enter a valid 11-digit BD number (e.g. 01712345678)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors bg-gray-50 peer">
+                    <p class="text-xs text-red-500 mt-1 hidden peer-[&:not(:placeholder-shown):invalid]:block">Must be
+                        11 digits starting with 01 (e.g. 01712345678)</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Select Package</label>
+                    <div class="relative">
+                        <select name="package"
+                            class="w-full px-3 py-2 border border-gray-300 rounded bg-white focus:outline-none focus:border-blue-600 appearance-none">
+                            <option>Basic: 50 Mbps - 800 Tk/mo</option>
+                            <option>Advance: 100 Mbps - 1,000 Tk/mo</option>
+                            <option>Paragon: 120 Mbps - 1,200 Tk/mo</option>
+                            <option>Storm: 150 Mbps - 1,500 Tk/mo</option>
+                            <option>Ultimate: 200 Mbps - 2,000 Tk/mo</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6 flex items-center p-3 bg-gray-50 rounded border border-gray-200">
+                    <input type="checkbox" name="realIp" id="realIp"
+                        class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="realIp" class="ml-3 block text-gray-700 text-sm font-bold">
+                        Add Public IP (Optional) <span class="font-normal text-gray-500">+200 Tk/mo</span>
+                    </label>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Full Address ( Flat No, Floor, Building
+                        Name, Building No, Road No, Society/Block)</label>
+                    <textarea name="manualAddress" required
+                        placeholder="Ex: Flat:Right Side,8th Floor,Chowdhury Center,Before Road 5,Nasirbad H/S,Opposite to Chittagong Education Board,Muradpur..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 h-24 resize-none"></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Preferred Installation Date</label>
+                    <input type="date" name="workingDate" id="workingDate" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-600 text-gray-700">
+                </div>
+
+                <div class="mb-6 bg-gray-50 p-4 border border-gray-200 rounded">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">GPS Location (Required)</label>
+
+                    <button type="button" onclick="getLocation()"
+                        class="w-full py-2 px-4 bg-white border border-gray-400 text-gray-700 font-medium rounded hover:bg-gray-100 hover:text-black transition flex justify-center items-center gap-2">
+                        <span id="locIcon">📍</span>
+                        <span id="locBtnText">Capture Current Location</span>
+                    </button>
+
+                    <p id="status" class="text-xs text-gray-500 mt-2 text-center">Please ensure GPS is enabled on your
+                        device.</p>
+
+                    <input type="hidden" name="lat" id="lat" required>
+                    <input type="hidden" name="lng" id="lng" required>
+                    <input type="hidden" name="acc" id="acc">
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-4 rounded shadow transition-colors">
+                    SUBMIT APPLICATION
+                </button>
+
+            </form>
+
+            <div id="successMessage" class="hidden text-center py-6">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Request Received!</h3>
+                <p class="text-gray-500 mt-2">Thanks for choosing MUX.<br>We will call you shortly.</p>
+                <button type="button" onclick="resetForm()"
+                    class="mt-5 px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded shadow transition-colors text-sm">
+                    Submit Another Application
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var watchId = null;
+        var watchTimeout = null;
+        var bestAccuracy = Infinity;
+
+        // ===== PERMISSION-AWARE AUTO-START =====
+        // Only auto-start GPS if permission is already granted.
+        // If not yet asked (prompt), wait for button press.
+        function autoStartIfAllowed() {
+            if (navigator.permissions && navigator.permissions.query) {
+                navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+                    if (result.state === 'granted') {
+                        getLocation(); // Already have permission, start silently
+                    } else if (result.state === 'prompt') {
+                        // Don't auto-trigger — let user press the button
+                        var status = document.getElementById("status");
+                        status.innerHTML = "Tap the button above to capture your location.";
+                    }
+                    // If 'denied', show helpful message
+                    else if (result.state === 'denied') {
+                        var status = document.getElementById("status");
+                        status.innerHTML = "Location permission blocked. Please enable it in your browser settings.";
+                        status.className = "text-xs text-red-600 mt-2 text-center";
+                    }
+                });
+            }
+            // Fallback: if Permissions API not supported, don't auto-start
+        }
+
+        // ===== MAIN GPS FUNCTION =====
+        function getLocation() {
+            var status = document.getElementById("status");
+            var btnText = document.getElementById("locBtnText");
+
+            if (!navigator.geolocation) {
+                status.innerHTML = "GPS not supported by this browser.";
+                status.className = "text-xs text-red-600 mt-2 text-center";
+                return;
+            }
+
+            // Stop any previous watch
+            stopWatching();
+            bestAccuracy = Infinity;
+
+            status.innerHTML = "Acquiring satellite signal...";
+            status.className = "text-xs text-blue-600 mt-2 text-center font-semibold animate-pulse";
+            btnText.innerHTML = "Locating...";
+            document.getElementById("locIcon").innerHTML = '<span class="loc-spinner"></span>';
+
+            var options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            };
+
+            // Phase 1: Get a quick first reading
+            navigator.geolocation.getCurrentPosition(function (position) {
+                // Save and lock immediately — user sees instant result
+                savePosition(position);
+                lockLocation();
+
+                // Phase 2: Silently refine in background
+                startRefinement();
+
+            }, onGpsError, options);
+        }
+
+        // ===== PHASE 2: REFINE WITH WATCH =====
+        function startRefinement() {
+            var options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            };
+
+            watchId = navigator.geolocation.watchPosition(function (position) {
+                var acc = position.coords.accuracy;
+
+                if (acc < bestAccuracy) {
+                    savePosition(position);
+                }
+
+                // Good enough — lock it
+                if (bestAccuracy <= 20) {
+                    stopWatching();
+                    lockLocation();
+                }
+            }, function () {
+                // Refinement error is not critical — we already have a reading
+                stopWatching();
+                lockLocation();
+            }, options);
+
+            // Auto-stop refinement after 10 seconds
+            watchTimeout = setTimeout(function () {
+                if (watchId !== null) {
+                    stopWatching();
+                    lockLocation();
+                }
+            }, 10000);
+        }
+
+        // ===== SAVE BEST POSITION =====
+        function savePosition(position) {
+            var acc = position.coords.accuracy;
+            if (acc < bestAccuracy) {
+                bestAccuracy = acc;
+                document.getElementById("lat").value = position.coords.latitude;
+                document.getElementById("lng").value = position.coords.longitude;
+                document.getElementById("acc").value = acc;
+            }
+        }
+
+        // ===== LOCK & DISPLAY FINAL RESULT =====
+        function lockLocation() {
+            var acc = Math.round(bestAccuracy);
+            var status = document.getElementById("status");
+
+            status.innerHTML = "✅ Location Locked! (Accuracy: " + acc + "m)";
+            status.className = "text-xs text-green-700 mt-2 text-center font-semibold";
+            document.getElementById("locBtnText").innerHTML = "Location Locked";
+            document.getElementById("locIcon").innerHTML = "✅";
+        }
+
+        // ===== STOP WATCHING =====
+        function stopWatching() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            if (watchTimeout !== null) {
+                clearTimeout(watchTimeout);
+                watchTimeout = null;
+            }
+        }
+
+        // ===== GPS ERROR (no intrusive alerts) =====
+        function onGpsError(err) {
+            stopWatching();
+            var status = document.getElementById("status");
+            var msg = "";
+
+            if (err.code == 1) msg = "📍 Location permission denied. Please allow location access and try again.";
+            else if (err.code == 2) msg = "📍 GPS unavailable. Please move to an open area and retry.";
+            else if (err.code == 3) msg = "📍 GPS timed out. Please check your signal and retry.";
+            else msg = "📍 Could not get location. Please retry.";
+
+            // Inline error — no alert() popup
+            status.innerHTML = msg;
+            status.className = "text-xs text-red-600 mt-2 text-center font-medium";
+            document.getElementById("locBtnText").innerHTML = "Retry Location";
+            document.getElementById("locIcon").innerHTML = "📍";
+        }
+
+        function handleFormSubmit(e, formObject) {
+            e.preventDefault();
+
+            if (!document.getElementById("lat").value) {
+                // Highlight GPS section instead of alert
+                var status = document.getElementById("status");
+                status.innerHTML = "⚠️ Please capture your GPS location first!";
+                status.className = "text-xs text-red-600 mt-2 text-center font-bold animate-pulse";
+                return;
+            }
+
+            var btn = document.getElementById("submitBtn");
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loc-spinner" style="border-top-color:#fff;border-color:rgba(255,255,255,0.3)"></span> PROCESSING...';
+            btn.classList.add("opacity-50", "cursor-not-allowed");
+
+            google.script.run
+                .withSuccessHandler(function () {
+                    document.getElementById("myForm").classList.add("hidden");
+                    document.getElementById("successMessage").classList.remove("hidden");
+                })
+                .withFailureHandler(function (error) {
+                    alert("Submission failed: " + error.message + "\nPlease try again.");
+                    btn.disabled = false;
+                    btn.innerHTML = "SUBMIT APPLICATION";
+                    btn.classList.remove("opacity-50", "cursor-not-allowed");
+                })
+                .processForm(formObject);
+        }
+
+        function resetForm() {
+            document.getElementById("myForm").reset();
+            document.getElementById("myForm").classList.remove("hidden");
+            document.getElementById("successMessage").classList.add("hidden");
+
+            // Reset GPS state
+            document.getElementById("lat").value = "";
+            document.getElementById("lng").value = "";
+            document.getElementById("acc").value = "";
+            document.getElementById("locIcon").innerHTML = "📍";
+            document.getElementById("locBtnText").innerHTML = "Capture Current Location";
+            document.getElementById("status").innerHTML = "Please ensure GPS is enabled on your device.";
+            document.getElementById("status").className = "text-xs text-gray-500 mt-2 text-center";
+
+            // Reset submit button
+            var btn = document.getElementById("submitBtn");
+            btn.disabled = false;
+            btn.innerHTML = "SUBMIT APPLICATION";
+            btn.classList.remove("opacity-50", "cursor-not-allowed");
+
+            bestAccuracy = Infinity;
+
+            // Check permission before auto-starting
+            autoStartIfAllowed();
+        }
+
+        // ===== PAGE LOAD =====
+        window.addEventListener('load', function () {
+            // Check permission before auto-starting GPS
+            autoStartIfAllowed();
+
+            // Prevent past date selection
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('workingDate').setAttribute('min', today);
+        });
+    </script>
+</body>
+
+</html>

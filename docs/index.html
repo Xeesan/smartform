@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartForm — ISP Customer Onboarding</title>
+    <meta name="description"
+        content="A GPS-enabled customer onboarding form for Internet Service Providers, built on Google Apps Script. Smart GPS tracking, auto dark mode, instant notifications.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface-2: #1a1a24;
+            --border: #2a2a3a;
+            --border-glow: #00d4aa30;
+            --text: #e4e4ef;
+            --text-dim: #8888a0;
+            --accent: #00d4aa;
+            --accent-glow: #00d4aa40;
+            --accent-2: #00b894;
+            --blue: #3b82f6;
+            --green: #22c55e;
+            --radius: 12px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glow orb */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            padding: 100px 0 60px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 28px;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 .accent {
+            color: var(--accent);
+        }
+
+        .hero .subtitle {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .hero .desc {
+            font-size: 16px;
+            color: var(--text-dim);
+            max-width: 560px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #00e6b8;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            padding: 60px 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .section-header h2 {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .section-header .line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--border), transparent);
+        }
+
+        /* ===== FEATURES ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .feature-card .icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* ===== SCREENSHOTS ===== */
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .screenshot-card {
+            text-align: center;
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            max-width: 280px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .screenshot-card img:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: scale(1.02);
+        }
+
+        .screenshot-card .label {
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        /* ===== SETUP STEPS ===== */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .step {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .step-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .step h3 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .step p {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-left: 42px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #0d0d14;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0 0 42px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--accent);
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block .comment {
+            color: #555570;
+        }
+
+        .code-block .string {
+            color: #fbbf24;
+        }
+
+        /* ===== ARCHITECTURE ===== */
+        .arch-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+        }
+
+        .arch-block h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .arch-flow {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.8;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .arch-flow .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .arch-flow .green {
+            color: var(--green);
+        }
+
+        .arch-flow .blue {
+            color: var(--blue);
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        /* ===== PREREQS ===== */
+        .prereq-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .prereq-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .prereq-tag .req {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 60px 0 40px;
+            color: var(--text-dim);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0 40px;
+            }
+
+            .screenshots-grid {
+                grid-template-columns: 1fr;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+
+            .arch-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="badge">
+                <span class="dot"></span>
+                Google Apps Script · Web App
+            </div>
+
+            <h1>Smart<span class="accent">Form</span></h1>
+            <p class="subtitle">GPS-Enabled · Auto Dark Mode · Instant Alerts</p>
+            <p class="desc">
+                A production-ready customer onboarding form for ISPs. Captures GPS coordinates with two-phase
+                refinement, saves to Google Sheets, and sends instant webhook notifications — all from a single
+                HTML file.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="https://github.com/Xeesan/smartform" class="btn btn-outline">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    Xeesan / smartform
+                </a>
+                <a href="https://github.com/Xeesan/smartform/archive/refs/heads/main.zip" class="btn btn-primary">
+                    ↓ Download ZIP
+                </a>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Features</h2>
+                <div class="line"></div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="icon">📍</span>
+                    <h3>Smart GPS Tracking</h3>
+                    <p>Two-phase location capture with silent background refinement. Phase 1 locks instantly, Phase 2
+                        improves accuracy invisibly.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🔐</span>
+                    <h3>Permission-Aware</h3>
+                    <p>Checks GPS permission state before auto-starting. Never shows intrusive popups on first visit —
+                        uses the Permissions API.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🌙</span>
+                    <h3>Auto Dark Mode</h3>
+                    <p>Follows system dark/light preference automatically using CSS media queries. Zero JavaScript, zero
+                        config.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">📊</span>
+                    <h3>Google Sheets Storage</h3>
+                    <p>Every submission saved with timestamp, GPS coordinates, accuracy, Google Maps link, and selected
+                        package.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🔔</span>
+                    <h3>Instant Notifications</h3>
+                    <p>Webhook integration with Make.com, Zapier, or any endpoint. Perfect for Telegram/Slack/Email
+                        alerts.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🛡️</span>
+                    <h3>Resilient Backend</h3>
+                    <p>Sheet data saved first, webhook wrapped in try-catch. If notifications fail, customer data is
+                        never lost.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">✅</span>
+                    <h3>BD Mobile Validation</h3>
+                    <p>Pattern-validated 11-digit Bangladesh numbers (01x format) with inline error messages. Easily
+                        customizable for any country.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🔄</span>
+                    <h3>Multi-Submit Ready</h3>
+                    <p>"Submit Another" button resets the form and auto-starts GPS again — no page reload needed for
+                        field agents.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREENSHOTS -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Screenshots</h2>
+                <div class="line"></div>
+            </div>
+
+            <div class="screenshots-grid">
+                <div class="screenshot-card">
+                    <img src="screenshots/light-mode.png" alt="Light Mode" loading="lazy">
+                    <p class="label">☀️ Light Mode</p>
+                </div>
+                <div class="screenshot-card">
+                    <img src="screenshots/dark-mode.png" alt="Dark Mode" loading="lazy">
+                    <p class="label">🌙 Dark Mode</p>
+                </div>
+                <div class="screenshot-card">
+                    <img src="screenshots/success-screen.png" alt="Success Screen" loading="lazy">
+                    <p class="label">✅ Success</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PREREQUISITES -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Prerequisites</h2>
+                <div class="line"></div>
+            </div>
+
+            <div class="prereq-row">
+                <div class="prereq-tag">
+                    Google Account
+                    <span class="req">required</span>
+                </div>
+                <div class="prereq-tag">
+                    Google Sheet
+                    <span class="req">required</span>
+                </div>
+                <div class="prereq-tag">
+                    Webhook URL
+                    <span class="req" style="color: var(--text-dim);">optional</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SETUP -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Installation & Setup</h2>
+                <div class="line"></div>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-num">1</div>
+                        <h3>Create a Google Sheet</h3>
+                    </div>
+                    <p>Create a new Google Sheet with headers: <strong>Timestamp, Name, Mobile, Address, Installation
+                            Date, Map Link, GPS Data, Package</strong></p>
+                </div>
+
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-num">2</div>
+                        <h3>Set Up Apps Script</h3>
+                    </div>
+                    <p>Go to <strong>script.google.com</strong> → New Project. Paste <code>code.gs</code> and create
+                        an HTML file named <code>Index</code> with the contents of <code>index.html</code>.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-num">3</div>
+                        <h3>Configure Credentials</h3>
+                    </div>
+                    <p>Open <code>code.gs</code> and replace the placeholder values with your own.</p>
+                    <div class="code-block">
+                        <span class="comment">// code.gs</span><br>
+                        var WEBHOOK_URL = <span class="string">"YOUR_WEBHOOK_URL_HERE"</span>;<br>
+                        var SHEET_URL = <span class="string">"YOUR_GOOGLE_SHEET_URL_HERE"</span>;
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-num">4</div>
+                        <h3>Deploy as Web App</h3>
+                    </div>
+                    <p>Click <strong>Deploy → New deployment → Web app</strong>. Set execute as "Me" and access to
+                        "Anyone". Copy the web app URL — that's your form link.</p>
+                    <div class="code-block">
+                        <span class="comment">// Your deployed form URL</span><br>
+                        https://script.google.com/macros/s/<span class="string">YOUR_DEPLOYMENT_ID</span>/exec
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-num">5</div>
+                        <h3>Set Up Webhook (Optional)</h3>
+                    </div>
+                    <p>Connect <strong>Make.com</strong> or <strong>Zapier</strong> to receive instant alerts via
+                        Telegram, Slack, Email, or Discord on every new submission.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Architecture</h2>
+                <div class="line"></div>
+            </div>
+
+            <div class="arch-grid">
+                <div class="arch-block">
+                    <h3>📍 GPS Flow</h3>
+                    <div class="arch-flow">
+                        <span class="highlight">Page Load</span>
+                        │
+                        ├─ <span class="green">Granted</span> → Auto-start GPS
+                        ├─ <span class="blue">Prompt</span> → Wait for tap
+                        └─ <span style="color:#ef4444">Denied</span> → Show help message
+
+                        <span class="highlight">GPS Capture</span>
+                        │
+                        ├─ Phase 1 → <span class="green">Instant lock</span> (1-5s)
+                        └─ Phase 2 → <span class="blue">Silent refine</span> (≤20m)
+                    </div>
+                </div>
+                <div class="arch-block">
+                    <h3>📊 Data Flow</h3>
+                    <div class="arch-flow">
+                        <span class="highlight">Form Submit</span>
+                        │
+                        ├─ 1. <span class="green">Save to Sheet</span> ✓
+                        │ Always succeeds first
+                        │
+                        └─ 2. <span class="blue">Send Webhook</span> 🔔
+                        try-catch wrapped
+                        If fails → logged only
+                        User still sees <span class="green">success</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>Built with ❤️ for ISPs who need fast, reliable customer onboarding.</p>
+            <p style="margin-top: 8px;">
+                <a href="https://github.com/Xeesan/smartform">GitHub</a> ·
+                <a href="https://github.com/Xeesan/smartform/issues">Issues</a> ·
+                MIT License
+            </p>
+        </footer>
+    </div>
+</body>
+
+</html>
